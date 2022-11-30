@@ -1,7 +1,8 @@
+import Home from "./page/Home"
 
 function App() {
   return (
-    <p>Hey</p>
+    <Home/>
   );
 }
 
