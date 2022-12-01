@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react'
 import axios from 'axios';
 
 const getPlayers = async()=>{
-  const data =  await axios.get("/api/players")
+  const data =  await axios.get("/api/pgatour/players")
   return data
 }
 
@@ -23,7 +23,7 @@ const Home = () => {
         <div key={idx}>
           <div>{item.name}</div>
           <div>{item.country}</div>
-          <div>{item.image}</div>
+          <img src={item.image} ></img>
         </div>
       )) }
     </>

@@ -3,6 +3,6 @@ const router = express.Router();
 
 const {getPlayers} = require('../controllers/pgatour')
 
-router.get('/pgatour', getPlayers)
+router.get('/players', getPlayers)
 
 module.exports = router
