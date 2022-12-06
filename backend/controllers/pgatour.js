@@ -63,71 +63,94 @@ const getLeaderboard = async (req, res, next) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(LEADERBOARD);
-    ////////////////// TOURNAMENT INFO ////////////////////
-    
-    const tournament_info = await page.$eval('.banner.section', (info,full_name)=>{ 
-        const name =  info.querySelector('.name a').innerText
-        const date = info.querySelector('.info-data .dates').innerText
-        const vod = info.querySelectorAll('.vod-carousel-item-button')
-        
-        const videos = [...vod].map((item, idx)=>{
-          let title = item.getAttribute('data-video-title')
-          let desc = item.getAttribute('data-video-description')
-          let link = item.getAttribute('data-video-link') 
-          let player_vod = { title,desc,link } 
-          
-          for (let i=0; i < full_name.length; i++){
-            if (desc.includes(full_name[i])) {
-              return player_vod
-            }
+
+    const leaderboard_page = await page.$eval('.wrap .container', (p, full_name)=>{
+///////////////// TOURNAMENT INFO //////////////////////////////
+      const banner = p.querySelector('.banner.section')
+      const name =  banner.querySelector('.name a').innerText
+      const date = banner.querySelector('.info-data .dates').innerText
+      const vod = banner.querySelectorAll('.vod-carousel-item-button')
+      const videos = Array.from(vod).map((item, idx)=>{
+        let title = item.getAttribute('data-video-title')
+        let desc = item.getAttribute('data-video-description')
+        let link = item.getAttribute('data-video-link') 
+        let player_vod = { title,desc,link } 
+        for (let i=0; i < full_name.length; i++){
+          if (desc.includes(full_name[i])) {
+            return player_vod
           }
-        })
-
-        const result ={
-          name,
-          date,
-          videos
         }
-        return result
-      },full_name)
+      })
+      const tournament_info ={
+        name,
+        date,
+        videos
+      }
+////////////////////// LEADERBORD HEADER /////////////////////////////////////
+// const header = p.querySelectorAll('th')
+  let position = p.querySelector('th.position').innerText
+  let player = p.querySelector('th.player-name').innerText
+  let total = p.querySelector('th.total').innerText
+  let rounds = p.querySelectorAll('th.round-x')
+  let all_rounds = [...rounds].map((r,idx)=>{
+    return r.innerText
+    // return r.innerText
+  })
+  const table_header = {
+    position,
+    country: "COUNTRY",
+    player,
+    total,
+    all_rounds,
+    strokes:"STROKES"
+  }
 
-    ////////////////// LEADER BOARD ////////////////////////
-    const leaderboard = await page.$$eval('tr.line-row', (tr) => {
-      const results = tr.map((td, idx) => {
-        // let strokes = td.querySelector('.strokes')
-        let strokes = td.querySelector('.total')
-        if(strokes !== null){
-          strokes = strokes.innerText
-        }
-        let round = td.querySelectorAll('td.round-x');
-        let all_rounds
-        all_rounds = [...round].map((r, idx) => {
+////////////////////// LEADERBOARD ///////////////////////////////////////////
+      const row = p.querySelectorAll('tr.line-row')
+      const leaderboard = Array.from(row).map((td, idx)=>{
+        let position =td.querySelector('.position').innerText
+        let country = td.querySelector('.flag').hasAttribute('aria-label')
+        let player = td.querySelector('.player-name-col').innerText
+
+        let stroke = td.querySelector('.strokes')
+        let total = td.querySelector('.total').innerText
+        let round = td.querySelectorAll('td.round-x')
+        let all_rounds = [...round].map((r, idx) => {
           return r.innerText
         });
-        const score_board = {
-          total: td.querySelector('.total').innerText,
-          // tee_time: info.querySelector('.tee-time').innerText,
+        let strokes
+        if(stroke !== null){
+          strokes = stroke.innerText
+        }else{
+          strokes = "--"
+        }
+      
+        let score_board = {
+          total,
           rounds: all_rounds,
           strokes
         };
-        const final_result = {
-          position: td.querySelector('.position').innerText,
-          country: td.querySelector('.flag').getAttribute('aria-label'),
-          player: td.querySelector('.player-name-col').innerText,
+        if(country){
+          country = td.querySelector('.flag').getAttribute('aria-label')
+        }else{
+          country = '--'
+        }
+        return final_result = {
+          position,
+          country,
+          player,
           score_board
         };
-        return final_result;
-      });
-      return results;
-    });
+      })
+      return {
+        tournament_info, 
+        table_header, 
+        leaderboard}
+    },full_name)
 
     await browser.close();
-    const leaderboard_page = {
-      tournament_info, 
-      leaderboard
-    }
+    
     res.send(leaderboard_page);
-    // res.send(leaderboard);
   } catch (err) {
     next(err);
   }
