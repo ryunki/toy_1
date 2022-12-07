@@ -56,19 +56,17 @@ const getLeaderboard = async (req, res, next) => {
   try {
     const player_names = await readFile()
     const full_name = player_names.split(",")
-    // console.log(full_name)
-    // full_name.map((item,idx)=>{
-    //   console.log(idx)
-    // })
+    
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(LEADERBOARD);
+    // await page.waitForSelector('.wrap .container')
 
     const leaderboard_page = await page.$eval('.wrap .container', (p, full_name)=>{
 ///////////////// TOURNAMENT INFO //////////////////////////////
       const banner = p.querySelector('.banner.section')
-      const name =  banner.querySelector('.name a').innerText
-      const date = banner.querySelector('.info-data .dates').innerText
+      const name =  banner.querySelector('.name a').innerText 
+      const date = banner.querySelector('.info-data .dates').innerText 
       const vod = banner.querySelectorAll('.vod-carousel-item-button')
       const videos = Array.from(vod).map((item, idx)=>{
         let title = item.getAttribute('data-video-title')
@@ -87,14 +85,14 @@ const getLeaderboard = async (req, res, next) => {
         videos
       }
 ////////////////////// LEADERBORD HEADER /////////////////////////////////////
-// const header = p.querySelectorAll('th')
-  let position = p.querySelector('th.position').innerText
-  let player = p.querySelector('th.player-name').innerText
-  let total = p.querySelector('th.total').innerText
-  let rounds = p.querySelectorAll('th.round-x')
+
+  let position = p.querySelector('th.position') === null ? "POSITION" : p.querySelector('th.position').innerText
+  let player = p.querySelector('th.player-name') === null ? "PLAYER NAME" : p.querySelector('th.player-name').innerText
+  let total = p.querySelector('th.total') === null ? "TOTAL SCORE" : p.querySelector('th.total').innerText
+  let rounds = p.querySelectorAll('th.round-x')  === null ? "--" : p.querySelectorAll('th.round-x')
   let all_rounds = [...rounds].map((r,idx)=>{
+    // return idx
     return r.innerText
-    // return r.innerText
   })
   const table_header = {
     position,
@@ -144,8 +142,9 @@ const getLeaderboard = async (req, res, next) => {
       })
       return {
         tournament_info, 
-        table_header, 
-        leaderboard}
+        table_header,
+        leaderboard
+      }
     },full_name)
 
     await browser.close();
