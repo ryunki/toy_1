@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs/promises')
 const path = require('path')
 
-const { PLAYERS, LEADERBOARD } = require('../url/pgatour');
+const { PLAYERS, LEADERBOARD, PGATOUR } = require('../url/pgatour');
 const headers = { headers: { 'Accept-Encoding': 'application/json' } };
 
 const writeFile = async(players)=>{
@@ -44,7 +44,7 @@ const getPlayers = async (req, res, next) => {
         });
       }
     });
-    // console.log("name: ",JSON.stringify(players))
+   
     res.send(players);
   } catch (err) {
     next(err);
@@ -69,8 +69,8 @@ const getLeaderboard = async (req, res, next) => {
       const date = banner.querySelector('.info-data .dates').innerText 
       const vod = banner.querySelectorAll('.vod-carousel-item-button')
       const videos = Array.from(vod).map((item, idx)=>{
-        let title = item.getAttribute('data-video-title')
-        let desc = item.getAttribute('data-video-description')
+        let title = item.getAttribute('data-video-title') 
+        let desc = item.getAttribute('data-video-description') 
         let link = item.getAttribute('data-video-link') 
         let player_vod = { title,desc,link } 
         for (let i=0; i < full_name.length; i++){
@@ -84,6 +84,7 @@ const getLeaderboard = async (req, res, next) => {
         date,
         videos
       }
+      console.log(tournament_info)
 ////////////////////// LEADERBORD HEADER /////////////////////////////////////
 
   let position = p.querySelector('th.position') === null ? "POSITION" : p.querySelector('th.position').innerText
@@ -155,7 +156,46 @@ const getLeaderboard = async (req, res, next) => {
   }
 };
 
+const getPlayerDetail = async(req,res,next) =>{
+  
+  try{
+    // const selected_player = decodeURIComponent(req.params.name)
+    const selected_player = req.params.name
+    // const selected_player = "Seung-Yul Noh"
+    console.log("selected player: ",selected_player)
+    const browser = await puppeteer.launch(
+      // {headless:false}
+      );
+    const page = await browser.newPage();
+    await page.goto(PLAYERS);
+
+    const display_player = await page.$$eval('li.player-card.active', (p,selected_player,PGATOUR)=>{
+      let player
+      p.map((item,idx)=>{
+        const firstname = item.querySelector('.player-firstname').innerText
+        const surname = item.querySelector('.player-surname').innerText
+        const fullname = firstname+" "+surname
+        const link = item.querySelector('a.player-link')
+        if(fullname.localeCompare(selected_player, 'en', {sensitivity: 'base',}) === 0){
+          return player = {
+            fullname : selected_player,
+            link : PGATOUR+link.getAttribute('href')
+          }
+        }
+      })
+      return player
+    }, selected_player,PGATOUR)
+    console.log("hey: ",display_player)
+    res.send(display_player)
+    
+    await browser.close();
+  }catch(err){
+    next(err)
+  }
+}
+
 module.exports = {
   getPlayers,
+  getPlayerDetail,
   getLeaderboard,
 };

@@ -17,5 +17,12 @@ app.get('/',async (req,res, next)=>{
 
 app.use('/api',api);
 
+app.use((error,req,res,next)=>{
+  res.status(500).json({
+    message: error.message,
+    stack:error.stack
+  })
+})
+
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));

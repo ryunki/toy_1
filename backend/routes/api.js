@@ -1,8 +1,8 @@
 const express = require('express')
 const app = express()
 
-const pgaTour = require('./pgatour')
+const pgatour = require('./pgatour')
 
-app.use('/pgatour', pgaTour)
+app.use('/pgatour', pgatour)
 
 module.exports = app

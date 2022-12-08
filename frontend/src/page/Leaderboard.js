@@ -77,7 +77,7 @@ const Leaderboard = () => {
             text="white"
             >
             <Card.Header >VIDEOS</Card.Header>
-            {videos.length !== 0 ? (
+            {videos[0] !== null ? (
               videos.map((item, idx) => (
                 <div key={idx}>
                   <div>{item.title}</div>
