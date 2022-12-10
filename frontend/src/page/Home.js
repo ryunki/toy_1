@@ -3,35 +3,65 @@ import { useState, useEffect } from 'react';
 import {useSelector, useDispatch} from 'react-redux'
 import {fetchPlayers} from '../redux/playerSlice'
 import store from '../redux/store'
-import axios from 'axios';
 
 import { Card, Col, Row } from 'react-bootstrap';
 import { loadState, saveState } from '../localStorage';
 
-
-
 const Home = () => {
   const [players, setPlayers] = useState([]);
+  const [match, setMatch] = useState(Boolean);
   const playersRedux = useSelector(state=>state.players)
   const dispatch = useDispatch()
   
   useEffect(() => {
     dispatch(fetchPlayers())
-    // console.log(playersRedux)
   }, []);
 
   useEffect(()=>{ //save data into localStorage when data arrives in redux state
-    // store.subscribe(()=>{
-      saveState(store.getState().players, "players") 
-    // })
-    const players2 = loadState("players")
-    setPlayers(players2)
-    // console.log("from state: ",players2)
-    // console.log("store state: ",store.getState().players)
+    const playersFromLocal = loadState("players")
+    console.log("From Local: ",playersFromLocal)
+    console.log("from redux: ",playersRedux)
+    if(playersFromLocal && playersFromLocal.players.length !== 0){  // if data already exists in local
+      const loadingR = playersRedux.loading
+      const playersR = playersRedux.players
+      // const error = playersRedux.error
+      if(!loadingR && playersR.length!==0){ // check if new data arrived in redux, if arrived
+        playersRedux.players.map((item,idx)=>{
+          const localName = playersFromLocal?.players[idx]?.name
+          const localImage = playersFromLocal?.players[idx]?.image
+          if(localName === item.name && localImage === item.image){
+            console.log(idx+ 'th item matches')
+            setMatch((prev)=>(prev=true))
+          }else{ // if there is any changes in player's name and image
+            console.log('found some changes')
+            setMatch((prev)=>(prev=false))
+            return 
+          } 
+        })
+        if(!match){
+          console.log("update players")
+          saveState(store.getState().players, "players") 
+          setPlayers(playersRedux)
+        }else{
+          console.log("all matches")
+          setPlayers(playersFromLocal) 
+        }
+      }else{ //if new data hasn't arrived in redux, show data from LocalStorage
+        console.log("new data hasn't arrived")
+        setPlayers(playersFromLocal) 
+      }
+    }else{
+      console.log("data doesnt exist in Local")
+      setPlayers(playersRedux)
+    }
+    console.log('end of useEffect')
+    // saveState(store.getState().players, "players") 
+    
   },[playersRedux])
 
   return (
     <>
+    <h1>Hey</h1>
       <Row>
         {players.loading && <div>Loading...</div>}
         {!players.loading && players.error ? <div>Error: {players.error}</div> : null}
