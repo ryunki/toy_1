@@ -19,14 +19,11 @@ const Home = () => {
 
   useEffect(()=>{ //save data into localStorage when data arrives in redux state
     const playersFromLocal = loadState("players")
-    console.log("From Local: ",playersFromLocal)
-    console.log("from redux: ",playersRedux)
     if(playersFromLocal && playersFromLocal.players.length !== 0){  // if data already exists in local
       const loadingR = playersRedux.loading
       const playersR = playersRedux.players
-      // const error = playersRedux.error
       if(!loadingR && playersR.length!==0){ // check if new data arrived in redux, if arrived
-        playersRedux.players.map((item,idx)=>{
+        playersR.map((item,idx)=>{
           const localName = playersFromLocal?.players[idx]?.name
           const localImage = playersFromLocal?.players[idx]?.image
           if(localName === item.name && localImage === item.image){
@@ -52,11 +49,9 @@ const Home = () => {
       }
     }else{
       console.log("data doesnt exist in Local")
+      saveState(store.getState().players, "players") 
       setPlayers(playersRedux)
     }
-    console.log('end of useEffect')
-    // saveState(store.getState().players, "players") 
-    
   },[playersRedux])
 
   return (
@@ -69,10 +64,7 @@ const Home = () => {
           players.players?.map((item, idx) => (
             <Col key={idx}>
               <Card style={{ width: '20rem' }}>
-                <Card.Img
-                  variant="top"
-                  src={item.image}
-                  alt="player"
+                <Card.Img variant="top" src={item.image} alt="player"
                 ></Card.Img>
                 <Card.Body>
                   <Card.Title>{item.name}</Card.Title>

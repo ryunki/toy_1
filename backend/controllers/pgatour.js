@@ -44,6 +44,11 @@ const getPlayers = async (req, res, next) => {
         });
       }
     });
+    // players.push({
+    //   country: "hey",
+    //   name: "Ryunki Shin",
+    //   image:"https://res.cloudinary.com/pga-tour/image/upload/c_fill,g_face:center,h_294,q_auto,w_220/v1/headshots_29289.png"
+    // });
    
     res.send(players);
   } catch (err) {
@@ -141,6 +146,20 @@ const getLeaderboard = async (req, res, next) => {
           score_board
         };
       })
+     
+      // leaderboard.push({
+      //   position:"1",
+      //   country:"Korea",
+      //   player:"Yoonki Shin",
+      //   score_board : {
+      //     total:"-50",
+      //     rounds: [
+      //       "11","11","11"
+      //     ],
+      //     strokes: "33"
+      //   }
+      // });
+
       return {
         tournament_info, 
         table_header,
@@ -185,7 +204,6 @@ const getPlayerDetail = async(req,res,next) =>{
       })
       return player
     }, selected_player,PGATOUR)
-    console.log("hey: ",display_player)
     res.send(display_player)
     
     await browser.close();

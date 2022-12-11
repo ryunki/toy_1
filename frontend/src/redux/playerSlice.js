@@ -10,8 +10,7 @@ const initialState={
 export const fetchPlayers = createAsyncThunk('fetchPlayers', ()=>{
   return axios
   .get('/api/pgatour/players')
-  .then((res)=> res.data.map((payload)=> payload))
-  
+  .then((res)=>  res.data.map((payload)=> payload))
 })
 
 const playerSlice = createSlice({

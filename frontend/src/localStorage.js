@@ -1,5 +1,6 @@
 export const loadState = (data) => {
   try {
+    // console.log("loadState----------------------")
     const serialState = localStorage.getItem(data);
     if (serialState === null) {
       return undefined;
@@ -12,6 +13,7 @@ export const loadState = (data) => {
 
 export const saveState = (data, item) => {
   try {
+    // console.log("saveState------------------------")
     const serialState = JSON.stringify(data);
     localStorage.setItem(item, serialState);
   } catch(err) {
