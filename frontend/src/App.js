@@ -2,7 +2,7 @@ import Home from "./page/Home"
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Players from "./page/Players";
-import Leaderboard from "./page/LeaderboardOriginal";
+import Leaderboard from "./page/Leaderboard";
 
 import NavigationBar from "./components/NavigationBar";
 
