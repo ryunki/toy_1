@@ -35,7 +35,7 @@ const getPlayers = async (req, res, next) => {
       const image_src = $(node).find('img').attr('src'); //default picture path
       const image_file = $(node).find('img').attr('data-src'); //real picture file
       if (country.localeCompare('korea, republic of', 'en', {sensitivity: 'base',}) === 0) {
-        const default_headshot = image_src.split('/').at(-1); //to replace the default path
+        const default_headshot = image_src?.split('/').at(-1); //to replace the default path
         const image = image_src.replace(default_headshot, image_file);
         players.push({
           country,
