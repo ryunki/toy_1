@@ -65,8 +65,8 @@ const getLeaderboard = async (req, res, next) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(LEADERBOARD);
-    // await page.waitForSelector('.wrap .container')
-
+    await page.waitForSelector('.wrap .container')
+    await page.waitForSelector('tr.line-row')
     const leaderboard_page = await page.$eval('.wrap .container', (p, full_name)=>{
 ///////////////// TOURNAMENT INFO //////////////////////////////
       const banner = p.querySelector('.banner.section')
@@ -119,14 +119,17 @@ const getLeaderboard = async (req, res, next) => {
         let stroke = td.querySelector('.strokes')
         let total = td.querySelector('.total').innerText
         let round = td.querySelectorAll('td.round-x')
+        let stroke_sum = 0
         let all_rounds = [...round].map((r, idx) => {
+          
+          stroke_sum += parseInt(r.innerText)
           return r.innerText
         });
         let strokes
         if(stroke !== null){
           strokes = stroke.innerText
         }else{
-          strokes = "--"
+          strokes = stroke_sum
         }
       
         let score_board = {
@@ -166,7 +169,7 @@ const getLeaderboard = async (req, res, next) => {
         leaderboard
       }
     },full_name)
-
+    console.log(leaderboard_page)
     await browser.close();
     
     res.send(leaderboard_page);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-import axios from 'axios';
 
-import {Table,Spinner,Button,Card,Container, Row,Col} from 'react-bootstrap';
+
+import {Table,Spinner,Card,Container, Row,Col} from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchLeaderboard } from '../redux/leaderboardSlice';
 import store from '../redux/store'
@@ -24,18 +24,21 @@ const Leaderboard = () => {
   const [showLeaderboard, setShowLeaderboard] = useState([]);
   const [showTableHeader, setShowTableHeader] = useState({});
   const [showTournamentInfo, setShowTournamentInfo] = useState({});
-  const [videos, setVideos] = useState([]);
 
+  // const [videos, setVideos] = useState([]);
+
+  const [refresh, setRefresh] = useState(false)
 useEffect(()=>{
     dispatch(fetchLeaderboard())
   },[])
 useEffect(()=>{
+  // leaderboard = undefined
   const leaderboardFromLocal = loadState("leaderboardState")
   const lbFromLocal = leaderboardFromLocal?.leaderboard.leaderboard
   const thFromLocal = leaderboardFromLocal?.leaderboard.table_header
   const tiFromLocal = leaderboardFromLocal?.leaderboard.tournament_info
   if(leaderboardFromLocal && leaderboardFromLocal.leaderboard !== 0){ // if leaderboard exists in local storage
-    if(!loadingRedux && leaderboard.length !== 0){ //if leaderboard has arrvied in redux state
+    if(!loadingRedux && leaderboard?.length !== 0){ //if leaderboard has arrvied in redux state
       console.log("***update leaderboard")
       saveState(store.getState().leaderboardState, "leaderboardState")
       setShowLeaderboard(leaderboard)
@@ -46,6 +49,11 @@ useEffect(()=>{
       setShowLeaderboard(lbFromLocal)
       setShowTableHeader(thFromLocal)
       setShowTournamentInfo(tiFromLocal)
+      if(leaderboard?.length ===0){
+        setRefresh(true)
+      }else{
+        setRefresh(false)
+      }
     }
   }else{
     console.log("***leaderboard from local doesnt exist")
@@ -65,12 +73,13 @@ useEffect(()=>{
             {!loadingRedux && showTournamentInfo ? (<>
               <Card.Title className="mx-auto">{showTournamentInfo.name}</Card.Title>
               <Card.Text className="mx-auto">{showTournamentInfo.date}</Card.Text>
-            </>) : loadingRedux && (
+            </>) : loadingRedux && showTournamentInfo ? (
               <>
               <Card.Title className="mx-auto">{showTournamentInfo.name}</Card.Title>
               <Card.Text className="mx-auto">{showTournamentInfo.date}</Card.Text>
             </>
-            )}
+            ) : null
+            }
           </Card>
           {/* <Card bg="dark"text="white">
           <Card.Header >VIDEOS</Card.Header>
@@ -94,10 +103,22 @@ useEffect(()=>{
         <Col xl={8}>
         <Card bg="dark" text="white" style={{ width: 'auto'}} className="mb-2">
             <Card.Header style={{ display:'flex', justifyContent: 'space-between'}}>LEADERBOARD {"  "}
-              {loadingRedux &&  
+              {loadingRedux ?  
                 <Card.Text variant="primary" >
                 <Spinner as="span" animation="border" size="sm"  role="status" aria-hidden="true" />
                 &nbsp;&nbsp; Updating... 
+                </Card.Text>
+               : refresh && leaderboard?.length === 0 ?  
+                <Card.Text variant="primary" >
+                &nbsp;&nbsp; No incoming data from website. refresh the page
+                </Card.Text>
+                :  !leaderboard && errorRedux === "Request failed with status code 500"?    //sometimes leaderboard is undefined after retreiving data from webpage
+                <Card.Text variant="primary" >
+                &nbsp;&nbsp; Refresh the page
+                </Card.Text>
+                : !loadingRedux && leaderboard?.length !== 0 &&
+                <Card.Text variant="primary" >
+                &nbsp;&nbsp; Update completed
                 </Card.Text>
                }
             </Card.Header> 
@@ -116,7 +137,7 @@ useEffect(()=>{
                           ))}
                         <th>{showTableHeader.strokes}</th>
                       </>
-                    ) : loadingRedux && (
+                    ) : loadingRedux &&showTableHeader&& (
                       <>
                         <th>{showTableHeader.position}</th>
                         <th>{showTableHeader.country}</th>
@@ -130,32 +151,6 @@ useEffect(()=>{
                       </>
                     )
                   }
-                    {/* {!loadingRedux && showTableHeader ? (
-                      
-                        <>
-                          <th>{showTableHeader.position}</th>
-                          <th>{showTableHeader.country}</th>
-                          <th>{showTableHeader.player}</th>
-                          <th>{showTableHeader.total}</th>
-                          {showTableHeader.all_rounds &&
-                            showTableHeader.all_rounds.map((r, idx) => (
-                              <th key={idx}>{r}</th>
-                            ))}
-                          <th>{showTableHeader.strokes}</th>
-                        </>
-                      ) : newData &&
-                        <>
-                          <th>{showTableHeader.position}</th>
-                          <th>{showTableHeader.country}</th>
-                          <th>{showTableHeader.player}</th>
-                          <th>{showTableHeader.total}</th>
-                          {showTableHeader.all_rounds &&
-                            showTableHeader.all_rounds.map((r, idx) => (
-                              <th key={idx}>{r}</th>
-                            ))}
-                          <th>{showTableHeader.strokes}</th>
-                        </>
-                    } */}
                   </tr>
                 </thead>
                 <tbody>
@@ -174,7 +169,7 @@ useEffect(()=>{
                         </tr>
                         ))}
                     </>)
-                   : loadingRedux ?
+                   : loadingRedux && showLeaderboard ?
                    (<>
                     {showLeaderboard.map((item, idx)=>(
                     <tr key={idx}>
@@ -189,7 +184,9 @@ useEffect(()=>{
                     </tr>
                     ))}
                   </>)
-                  : null
+                  : <tr>
+                    <td>Please try again</td>
+                  </tr>
                   }
                  
                 </tbody>

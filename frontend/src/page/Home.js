@@ -15,7 +15,7 @@ const Home = () => {
   
   useEffect(() => {
     dispatch(fetchPlayers())
-  }, []);
+  }, [dispatch]);
 
   useEffect(()=>{ //save data into localStorage when data arrives in redux state
     const playersFromLocal = loadState("players")
@@ -56,7 +56,6 @@ const Home = () => {
 
   return (
     <>
-    <h1>Hey</h1>
       <Row>
         {players.loading && <div>Loading...</div>}
         {!players.loading && players.error ? <div>Error: {players.error}</div> : null}
