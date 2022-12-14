@@ -78,27 +78,29 @@ useEffect(()=>{
               <Card.Title className="mx-auto">{showTournamentInfo.name}</Card.Title>
               <Card.Text className="mx-auto">{showTournamentInfo.date}</Card.Text>
             </>
-            ) : null
-            }
+            ) : null}
           </Card>
-          {/* <Card bg="dark"text="white">
-          <Card.Header >VIDEOS</Card.Header>
-            {videos[0] !== null ? (
-                videos.map((item, idx) => (
-                  <div key={idx}>
-                    <div>{item.title}</div>
-                    <div>{item.desc}</div>
-                    <div>{item.link}</div>
-                  </div>
-                ))
-              ) : (
-                <>
-                  <Card.Text className="mx-auto">No Videos</Card.Text>
-                  <br/>
-                </>
-                
-              )}
-          </Card> */}
+          <Card bg="dark"text="white">
+          <Card.Header >VIDEOS</Card.Header>{console.log(showTournamentInfo.videos)}
+            {!loadingRedux &&showTournamentInfo?.videos ? (<>
+              {showTournamentInfo.videos.map((item,idx)=> 
+              <div key={idx}>
+                <Card.Text className="mx-auto">{item.title}</Card.Text>
+                <Card.Text className="mx-auto">{item.desc}</Card.Text>
+                <Card.Text className="mx-auto">{item.link}</Card.Text>
+              </div>
+            )}
+            </>) : loadingRedux && showTournamentInfo?.videos ? (<>
+              {showTournamentInfo.videos.map((item,idx)=> 
+              <div key={idx}>
+                <Card.Text className="mx-auto">{item.title}</Card.Text>
+                <Card.Text className="mx-auto">{item.desc}</Card.Text>
+                <Card.Text className="mx-auto">{item.link}</Card.Text>
+              </div>
+            )}
+            </>) : <Card.Text className="mx-auto">No Videos</Card.Text>}
+                  
+          </Card>
         </Col>
         <Col xl={8}>
         <Card bg="dark" text="white" style={{ width: 'auto'}} className="mb-2">
@@ -184,9 +186,7 @@ useEffect(()=>{
                     </tr>
                     ))}
                   </>)
-                  : <tr>
-                    <td>Please try again</td>
-                  </tr>
+                  : null
                   }
                  
                 </tbody>

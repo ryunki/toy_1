@@ -49,7 +49,7 @@ const getPlayers = async (req, res, next) => {
     //   name: "Ryunki Shin",
     //   image:"https://res.cloudinary.com/pga-tour/image/upload/c_fill,g_face:center,h_294,q_auto,w_220/v1/headshots_29289.png"
     // });
-   
+    // console.log(players)
     res.send(players);
   } catch (err) {
     next(err);
@@ -65,31 +65,34 @@ const getLeaderboard = async (req, res, next) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(LEADERBOARD);
-    await page.waitForSelector('.wrap .container')
-    await page.waitForSelector('tr.line-row')
+    // await page.waitForSelector('.wrap .container')
+    // await page.waitForSelector('tr.line-row')
     const leaderboard_page = await page.$eval('.wrap .container', (p, full_name)=>{
 ///////////////// TOURNAMENT INFO //////////////////////////////
       const banner = p.querySelector('.banner.section')
       const name =  banner.querySelector('.name a').innerText 
       const date = banner.querySelector('.info-data .dates').innerText 
       const vod = banner.querySelectorAll('.vod-carousel-item-button')
-      const videos = Array.from(vod).map((item, idx)=>{
-        let title = item.getAttribute('data-video-title') 
-        let desc = item.getAttribute('data-video-description') 
-        let link = item.getAttribute('data-video-link') 
-        let player_vod = { title,desc,link } 
-        for (let i=0; i < full_name.length; i++){
-          if (desc.includes(full_name[i])) {
-            return player_vod
+      let videos 
+      if(vod.length !== 0){
+        videos = Array.from(vod).map((item, idx)=>{
+          let title = item.getAttribute('data-video-title') 
+          let desc = item.getAttribute('data-video-description') 
+          let link = item.getAttribute('data-video-link') 
+          let player_vod = { title,desc,link } 
+          for (let i=0; i < full_name.length; i++){
+            if (desc.includes(full_name[i])) {
+              return player_vod
+            }
           }
-        }
-      })
+        })
+      }
+      
       const tournament_info ={
         name,
         date,
         videos
       }
-      console.log(tournament_info)
 ////////////////////// LEADERBORD HEADER /////////////////////////////////////
 
   let position = p.querySelector('th.position') === null ? "POSITION" : p.querySelector('th.position').innerText
@@ -169,9 +172,9 @@ const getLeaderboard = async (req, res, next) => {
         leaderboard
       }
     },full_name)
-    console.log(leaderboard_page)
-    await browser.close();
     
+    await browser.close();
+    console.log(leaderboard_page.tournament_info.videos)
     res.send(leaderboard_page);
   } catch (err) {
     next(err);
@@ -183,8 +186,6 @@ const getPlayerDetail = async(req,res,next) =>{
   try{
     // const selected_player = decodeURIComponent(req.params.name)
     const selected_player = req.params.name
-    // const selected_player = "Seung-Yul Noh"
-    console.log("selected player: ",selected_player)
     const browser = await puppeteer.launch(
       // {headless:false}
       );
@@ -207,6 +208,7 @@ const getPlayerDetail = async(req,res,next) =>{
       })
       return player
     }, selected_player,PGATOUR)
+    console.log(display_player)
     res.send(display_player)
     
     await browser.close();
